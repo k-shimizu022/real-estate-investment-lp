@@ -201,8 +201,8 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
 
         // フィールド定義修正
         const fields = [
-            { id: 'name', label: 'お名前', placeholder: '例：山田 太郎', pattern: "^[^a-zA-Z0-9 -~｡-ﾟ]+$", title: '全角で入力してください（半角英数字不可）', errorId: `error-input-name` },
-            { id: 'kana', label: 'ふりがな', placeholder: '例：やまだ たろう', pattern: "^[ぁ-んー\\u3000]+$", title: '全角ひらがなで入力してください', errorId: `error-input-kana` } // 全角スペース \u3000 を許容
+            { id: 'name', label: 'お名前', placeholder: '例：山田太郎', pattern: "^[^a-zA-Z0-9 -~｡-ﾟ]+$", title: '全角で入力してください（半角英数字不可）', errorId: `error-input-name` },
+            { id: 'kana', label: 'ふりがな', placeholder: '例：やまだたろう', pattern: "^[ぁ-んー\\u3000]+$", title: '全角ひらがなで入力してください', errorId: `error-input-kana` } // 全角スペース \u3000 を許容
         ];
         const inputElements = {};
 
