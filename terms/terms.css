@@ -1,0 +1,161 @@
+/* 規約ページ固有のスタイル */
+body {
+    background-color: #f8f8f8;
+    color: #333;
+}
+.policy-container {
+    max-width: 960px;
+    margin: 2em auto;
+    background-color: #fff;
+    padding: 2em 3em;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    min-height: 60vh;
+}
+
+/* --- コンテンツ表示制御 --- */
+.policy-content {
+    display: none; /* 初期状態では非表示 */
+    /* ===== 追加: スクロールマージン ===== */
+    /* ヘッダーの高さ分だけ上にマージンを設定 */
+    /* 実際のヘッダー高さに合わせて値を調整してください */
+    scroll-margin-top: 180px;
+    /* ================================ */
+}
+.policy-content.active {
+    display: block; /* アクティブなコンテンツのみ表示 */
+}
+/* --- ここまで --- */
+
+
+/* --- スタイル調整 --- */
+.policy-container h1 { /* 各ポリシーのタイトル */
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 1.5em;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5em;
+}
+.policy-container h2 { /* 条項などの見出し */
+    font-size: 1.4em;
+    color: #333;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    text-align: left;
+    border-left: none;
+    padding-left: 0;
+}
+/* --- h3 スタイルの追加 --- */
+.policy-container h3 {
+    font-size: 1.2em; /* h2より少し小さく */
+    color: #444; /* 少し薄い色に */
+    margin-top: 1.8em; /* 上マージン */
+    margin-bottom: 0.8em; /* 下マージン */
+    text-align: left;
+    font-weight: bold;
+}
+.policy-container p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+    color: #333;
+}
+.policy-container ul {
+    margin-left: 0;
+    margin-bottom: 1em;
+    /* padding-left: 1.5em; */
+    list-style-type: none; /* 中点削除 */
+}
+.policy-container ul ul {
+     margin-left: 1.5em;
+     list-style-type: disc;
+     margin-top: 0.5em;
+}
+/* h3 の下の ul/li の調整 (必要であれば) */
+.policy-container h3 + ul {
+    /* margin-top: 0.5em; */ /* h3直後のリストの上マージン調整 */
+}
+.policy-container li {
+    margin-bottom: 0.5em;
+    color: #333;
+}
+
+/* ===== 追加: リンクの折り返し設定 ===== */
+.policy-container a {
+    overflow-wrap: break-word; /* 長い単語やURLを折り返す */
+    word-wrap: break-word; /* 旧ブラウザ用 */
+    word-break: break-word; /* 必要に応じて追加 (単語の途中でも改行を許可) */
+    /* color: #007bff; */
+}
+/* ===== 追加ここまで ===== */
+
+/* --- テーブル用のスタイル --- */
+.table-container {
+    overflow-x: auto;
+    margin: 1.5em 0;
+}
+.policy-container table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    font-size: 0.9em;
+}
+.policy-container th,
+.policy-container td {
+    border: 1px solid #ddd;
+    padding: 0.8em;
+    text-align: left;
+    vertical-align: top;
+}
+.policy-container thead th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+}
+.policy-container tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+/* --- テーブル内の箇条書きスタイル --- */
+.policy-container td ul {
+    margin: 0;
+    padding-left: 1.5em;
+    list-style-type: disc;
+}
+.policy-container td li {
+    margin-bottom: 0.3em;
+}
+/* --- テーブルスタイルここまで --- */
+
+
+/* --- スタイル調整ここまで --- */
+
+.footer-date {
+    text-align: right;
+    margin-top: 3em;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* フッターリンクの現在地表示用 */
+footer .footer-links a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+/* style.css の .container と競合しないように */
+header .container, footer .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- プライバシーポリシー・個人情報取扱い の連絡先整形用 --- */
+.contact-info {
+     margin-top: 1.5em;
+     padding-left: 1em;
+     border-left: 3px solid #eee;
+}
+ .contact-info p {
+    margin-bottom: 0.3em;
+ }

@@ -112,21 +112,21 @@ h2 span, h3 span {
 
 /* パルスアニメーション */
 .pulse {
-    animation: pulse 2s infinite;
+    animation: pulse-white 2s infinite;
 }
 
-@keyframes pulse {
+@keyframes pulse-white {
     0% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(135, 21, 122, 0.4);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
     }
     70% {
         transform: scale(1.05);
-        box-shadow: 0 0 0 10px rgba(135, 21, 122, 0);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
     }
     100% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(135, 21, 122, 0);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     }
 }
 
@@ -146,9 +146,13 @@ header .container {
 }
 
 .logo {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #87157a;
+    display: grid;
+}
+
+@media (max-width: 576px) {
+    .logo img {
+        max-width: 180px;
+    }
 }
 
 /* セクション共通 */
@@ -235,9 +239,11 @@ section {
 }
 
 .hero-image img {
-    max-width: 100%;
+    /* max-width: 100%; */
+    width: 100%;
+    height: 100%;
     border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
 }
 
 .sub-copy {
@@ -355,8 +361,8 @@ table tr:nth-child(even) {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-width: 90%; /* コンテナの90%までに制限 */
-    max-height: 90%; /* コンテナの90%までに制限 */
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .shape-2 {
@@ -422,23 +428,28 @@ table tr:nth-child(even) {
 
 /* 項目の位置を円周上に配置 */
 .item-1 {
-    top: calc(50% - 190px - 60px);
+    top: calc(50% - 190px - 60px); /* 12時位置 */
     left: calc(50% - 60px);
 }
 
 .item-2 {
-    top: calc(50% - 60px);
-    right: calc(50% - 190px - 60px);
+    top: calc(50% - 0.31*190px - 60px); /* 2時位置 */
+    right: calc(50% - 0.95*190px - 60px);
 }
 
 .item-3 {
-    bottom: calc(50% - 190px - 60px);
-    left: calc(50% - 60px);
+    bottom: calc(50% - 0.81*190px - 60px); /* 5時位置 */
+    right: calc(50% - 0.59*190px - 60px);
 }
 
 .item-4 {
-    top: calc(50% - 60px);
-    left: calc(50% - 190px - 60px);
+    bottom: calc(50% - 0.81*190px - 60px); /* 8時位置 */
+    left: calc(50% - 0.59*190px - 60px);
+}
+
+.item-5 {
+    top: calc(50% - 0.31*190px - 60px); /* 10時位置 */
+    left: calc(50% - 0.95*190px - 60px);
 }
 
 .flow-icon {
@@ -461,7 +472,7 @@ table tr:nth-child(even) {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-bottom: 1.2rem; /* マージン増加 */
+    /* margin-bottom: 1.2rem; */
 }
 
 .process-item:last-child {
@@ -507,9 +518,9 @@ table tr:nth-child(even) {
         height: 500px;
     }
     
-    .process-text {
+    /* .process-text {
         gap: 1rem;
-    }
+    } */
     
     .process-item {
         padding: 1rem;
@@ -546,23 +557,28 @@ table tr:nth-child(even) {
     }
     
     .item-1 {
-        top: calc(50% - 160px - 50px);
+        top: calc(50% - 160px - 50px); /* 12時位置 */
         left: calc(50% - 50px);
     }
     
     .item-2 {
-        top: calc(50% - 50px);
-        right: calc(50% - 160px - 50px);
+        top: calc(50% - 0.31*160px - 50px); /* 2時位置 */
+        right: calc(50% - 0.95*160px - 50px);
     }
     
     .item-3 {
-        bottom: calc(50% - 160px - 50px);
-        left: calc(50% - 50px);
+        bottom: calc(50% - 0.81*160px - 50px); /* 5時位置 */
+        right: calc(50% - 0.59*160px - 50px);
     }
     
     .item-4 {
-        top: calc(50% - 50px);
-        left: calc(50% - 160px - 50px);
+        bottom: calc(50% - 0.81*160px - 50px); /* 8時位置 */
+        left: calc(50% - 0.59*160px - 50px);
+    }
+    
+    .item-5 {
+        top: calc(50% - 0.31*160px - 50px); /* 10時位置 */
+        left: calc(50% - 0.95*160px - 50px);
     }
 }
 
@@ -597,23 +613,28 @@ table tr:nth-child(even) {
     }
     
     .item-1 {
-        top: calc(50% - 135px - 42.5px);
+        top: calc(50% - 135px - 42.5px); /* 12時位置 */
         left: calc(50% - 42.5px);
     }
     
     .item-2 {
-        top: calc(50% - 42.5px);
-        right: calc(50% - 135px - 42.5px);
+        top: calc(50% - 0.31*135px - 42.5px); /* 2時位置 */
+        right: calc(50% - 0.95*135px - 42.5px);
     }
     
     .item-3 {
-        bottom: calc(50% - 135px - 42.5px);
-        left: calc(50% - 42.5px);
+        bottom: calc(50% - 0.81*135px - 42.5px); /* 5時位置 */
+        right: calc(50% - 0.59*135px - 42.5px);
     }
     
     .item-4 {
-        top: calc(50% - 42.5px);
-        left: calc(50% - 135px - 42.5px);
+        bottom: calc(50% - 0.81*135px - 42.5px); /* 8時位置 */
+        left: calc(50% - 0.59*135px - 42.5px);
+    }
+    
+    .item-5 {
+        top: calc(50% - 0.31*135px - 42.5px); /* 10時位置 */
+        left: calc(50% - 0.95*135px - 42.5px);
     }
 }
 
@@ -623,8 +644,8 @@ table tr:nth-child(even) {
     }
     
     .shape-1 {
-        width: 320px;
-        height: 320px;
+        width: 340px;
+        height: 340px;
     }
 }
 
@@ -674,7 +695,7 @@ table tr:nth-child(even) {
 
 .highlight {
     font-weight: 700;
-    color: #87157a;
+    color: #e74c3c;
     margin-top: 1rem;
 }
 
@@ -691,6 +712,9 @@ table tr:nth-child(even) {
 
 /* 下のコンテンツ部分の余白調整 */
 .reason-card-body {
+    text-align: center;
+    max-width: 1024px;
+    margin-inline: auto;
     padding: 1rem 2rem 2rem; /* 上部パディングを減らし、ヘッダーとの間隔を適切に */
 }
 
@@ -737,7 +761,7 @@ table tr:nth-child(even) {
 .stat-number {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #87157a;
+    color: #e74c3c;
     display: block;
 }
 
@@ -749,11 +773,14 @@ table tr:nth-child(even) {
 .reason-description {
     color: #444;
     line-height: 1.7;
+    text-align: left;
 }
 
-/* 長期資産形成シミュレーション - 幅広版 */
+/*--------------------------------------------------------------
+# 長期資産形成シミュレーション
+--------------------------------------------------------------*/
 .simulation-case-wide {
-    padding: 2.5rem 0;
+    /* padding: 2.5rem 0; */
     width: 100%;
 }
 
@@ -801,6 +828,84 @@ table tr:nth-child(even) {
     margin: 2rem 0;
 }
 
+/* タブUI */
+.tabs-container {
+    position: sticky;
+    top: 120px; /* ヘッダーの高さに合わせて調整 */
+    background-color: #fff;
+    z-index: 99;
+    /* padding: 10px 0; */
+    margin: 2rem 0;
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); */
+}
+
+.tab-items {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-item {
+    padding: 1rem 2rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #555;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    margin: 0 0.5rem;
+    text-align: center;
+}
+
+.tab-item span {
+    display: inline-block;
+}
+
+.tab-item:hover {
+    color: #87157a;
+}
+
+.tab-item.active {
+    color: #87157a;
+    border-bottom: 3px solid #87157a;
+}
+
+@media (max-width: 576px) {
+    .tabs-container {
+        top: 100px;
+    }
+    .tab-item {
+        padding: 1rem 0;
+    }
+}
+
+/* グラフセクション */
+.chart-section {
+    margin-bottom: 3rem;
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.chart-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    height: 350px;
+}
+
+.note {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: right;
+    margin-top: 10px;
+}
+
 .scenario-toggles {
     display: flex;
     justify-content: center;
@@ -821,6 +926,46 @@ table tr:nth-child(even) {
 .scenario-btn.active, .scenario-btn:hover {
     background-color: #87157a;
     color: white;
+}
+
+/* シナリオ詳細のデザイン改善 */
+.scenario-details {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.scenario-details h4 {
+    color: #87157a;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+.scenario-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.scenario-detail-item:last-child {
+    border-bottom: none;
+}
+
+.scenario-detail-item .label {
+    font-weight: 500;
+    color: #444;
+}
+
+.scenario-detail-item .value {
+    font-weight: 700;
+    color: #e74c3c;
 }
 
 /* お客様の声セクション - カラー背景 */
@@ -951,7 +1096,9 @@ table tr:nth-child(even) {
     max-height: none;
 }
 
-/* 成功オーナーインタビューセクション */
+/*--------------------------------------------------------------
+# 成功したオーナー紹介セクション
+--------------------------------------------------------------*/
 .success-stories-container {
     display: flex;
     flex-direction: column;
@@ -1004,9 +1151,304 @@ table tr:nth-child(even) {
     margin-right: 0.5rem;
 }
 
-/* 最終CTA - デザイン強化 */
+/*--------------------------------------------------------------
+# 確かな知識と実績セクション
+--------------------------------------------------------------*/
+/* 確かな知識と実績セクション */
+#expertise {
+    background-color: #f9f9f9;
+    padding: 5rem 0;
+}
+
+.expertise-container {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+/* 代表者プロフィール部分 */
+.expert-profile {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.expert-photo {
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+}
+
+.expert-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.expert-info {
+    padding: 2rem;
+}
+
+.expert-name {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.2rem;
+}
+
+.expert-title {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.expert-description p {
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+.expert-credentials {
+    margin-top: 2rem;
+}
+
+.expert-credentials h4 {
+    font-size: 1.3rem;
+    color: #2980b9;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.credentials-list {
+    list-style-type: none;
+    margin-bottom: 1.5rem;
+}
+
+.credentials-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #eee;
+    display: flex;
+    align-items: center;
+}
+
+.credentials-list li:before {
+    content: '✓';
+    color: #2980b9;
+    margin-right: 0.8rem;
+    font-weight: bold;
+}
+
+.certification-images {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.cert-img {
+    height: 60px;
+    width: auto;
+}
+
+/* 実績部分 */
+.expert-achievements {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.published-books, .media-appearances {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.published-books h3, .media-appearances h3 {
+    font-size: 1.5rem;
+    color: #2980b9;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+/* 著書紹介部分 */
+.book-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.book-item {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.book-cover {
+    flex: 0 0 120px;
+}
+
+.book-cover img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.book-info {
+    flex: 1;
+}
+
+.book-info h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+}
+
+.book-publisher {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.8rem;
+}
+
+.book-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+}
+
+.book-sales {
+    margin-top: 0.5rem;
+}
+
+/* メディア出演部分 */
+.media-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* YouTube埋め込み動画スタイル */
+.youtube-video {
+    margin-bottom: 2rem;
+}
+
+.youtube-video h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.video-embed {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.video-embed iframe {
+    border-radius: 8px;
+}
+
+.video-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.media-list {
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
+}
+
+.media-list h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.media-list ul {
+    list-style-type: none;
+}
+
+.media-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+}
+
+.media-list li:before {
+    content: '•';
+    color: #2980b9;
+    margin-right: 0.8rem;
+    font-weight: bold;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 992px) {
+    .expertise-container {
+        flex-direction: column;
+    }
+    
+    .expert-photo {
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .book-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .book-cover {
+        margin-bottom: 1rem;
+        flex: 0 0 180px;
+    }
+    
+    .video-embed iframe {
+        height: 200px;
+    }
+    
+    .youtube-video {
+        text-align: center;
+    }
+    
+    .credentials-list li:before, .media-list li:before {
+        margin-right: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .expert-photo {
+        height: 220px;
+    }
+    
+    .expert-name {
+        font-size: 1.7rem;
+    }
+    
+    .certification-images {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .video-embed iframe {
+        height: 180px;
+    }
+}
+
+/*--------------------------------------------------------------
+# 最終CTA
+--------------------------------------------------------------*/
 #final-cta {
-    background: linear-gradient(135deg, #87157a 0%, #5d1054 100%);
+    /* background: linear-gradient(135deg, #87157a 0%, #5d1054 100%); */
     color: white;
     padding: 5rem 0;
     position: relative;
@@ -1020,10 +1462,11 @@ table tr:nth-child(even) {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('https://placehold.jp/1280x720.png');
+    background-image: url('img/final-cta-img.png');
     background-size: cover;
     background-position: center;
-    opacity: 0.1;
+    background-repeat: no-repeat;
+    opacity: 0.9;
     z-index: 1;
 }
 
@@ -1089,6 +1532,10 @@ table tr:nth-child(even) {
     margin-top: 1rem;
     color: white;
     font-weight: 500;
+}
+
+.cta-note span {
+    display: inline-block;
 }
 
 .cta-benefits {
