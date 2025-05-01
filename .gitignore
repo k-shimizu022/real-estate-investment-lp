@@ -1,0 +1,17 @@
+# .gitignore ファイルの内容例
+
+# 設定ファイル
+config.php
+
+# PHPMailerライブラリ (手動で設置した場合)
+/lib/PHPMailer/
+
+# Composer の vendor ディレクトリ (Composerを使用した場合)
+/vendor/
+
+# 環境変数ファイル (もし使う場合)
+.env
+
+# OSが生成するファイルなど (任意)
+.DS_Store
+Thumbs.db
