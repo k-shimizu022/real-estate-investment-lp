@@ -1,16 +1,23 @@
 // --- START OF SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に実行
 
+    // --- チャット関連要素 ---
     const chatMessagesContainer = document.getElementById('chat-messages');
     const chatContainer = document.getElementById('chat-container');
     const openChatBtns = document.querySelectorAll('.open-chat-btn');
     const closeChatBtn = document.getElementById('close-chat-btn');
+    // --- ダイアログ関連要素 ---
+    const successDialogOverlay = document.getElementById('success-dialog-overlay');
+    const successDialogMessage = document.getElementById('success-dialog-message');
+    const successDialogCloseBtn = document.getElementById('success-dialog-close-btn');
 
-    if (!chatMessagesContainer || !chatContainer || !closeChatBtn || openChatBtns.length === 0) {
-        console.error('チャットに必要なHTML要素が見つかりません。IDやクラス名を確認してください: #chat-messages, #chat-container, #close-chat-btn, .open-chat-btn');
+    // --- 要素存在チェック ---
+    if (!chatMessagesContainer || !chatContainer || !closeChatBtn || openChatBtns.length === 0 || !successDialogOverlay || !successDialogMessage || !successDialogCloseBtn) {
+        console.error('チャットまたはダイアログに必要なHTML要素が見つかりません。IDやクラス名を確認してください。');
         return;
     }
 
+    // --- グローバル変数 ---
     const userAnswers = {};
     let currentQuestionIndex = 0;
     let isChatInitialized = false;
@@ -52,9 +59,7 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         } else {
             chatMessagesContainer.appendChild(element);
         }
-        // 自動スクロールはここでは行わない
     }
-
 
     // 選択肢ボタンのコンテナを作成する
     function createOptionsContainer(step, index) {
@@ -77,7 +82,24 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         if (!errorElement) {
             errorElement = document.createElement('span');
             errorElement.className = 'error-message';
-            targetElement.appendChild(errorElement);
+            // text や textarea のラッパーにエラーを追加するように変更
+            if (targetElement.classList.contains('input-wrapper') ||
+                targetElement.classList.contains('birthdate-field-wrapper') ||
+                targetElement.classList.contains('input-field-container')) {
+                targetElement.appendChild(errorElement);
+            } else if (targetElement.classList.contains('birthdate-group')) {
+                // 生年月日グループ全体のエラーは、決定ボタンの前に挿入する
+                const submitBtn = targetElement.querySelector('.submit-input-btn');
+                if(submitBtn) {
+                     targetElement.insertBefore(errorElement, submitBtn);
+                } else {
+                    targetElement.appendChild(errorElement); // 予備
+                }
+                errorElement.classList.add('group-error'); // スタイル用クラス
+            }
+             else {
+                targetElement.appendChild(errorElement);
+            }
         }
         errorElement.textContent = message;
     }
@@ -86,10 +108,14 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         if (errorElement) {
             errorElement.textContent = '';
         }
+        // グループエラーもクリア
+        const groupError = targetElement.querySelector('.group-error');
+         if (groupError) {
+             groupError.textContent = '';
+         }
     }
 
-
-    // 生年月日入力グループのコンテナを作成 (修正: 横並びレイアウト)
+    // 生年月日入力グループのコンテナを作成
     function createBirthdateContainer(step, index) {
         if (step.inputType !== 'birthdate-group') return null;
 
@@ -105,35 +131,36 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         const inputElements = {};
 
         fields.forEach((field, fieldIndex) => {
-            // --- inputWrapper はフィールド全体を包む ---
             const inputWrapper = document.createElement('div');
-            inputWrapper.className = 'birthdate-field-wrapper'; // CSS適用のためクラス追加
-
-            // --- input と label を横並びにするためのrow ---
+            inputWrapper.className = 'birthdate-field-wrapper';
             const fieldRow = document.createElement('span');
-            fieldRow.className = 'birthdate-field-row'; // CSS適用のためクラス追加
+            fieldRow.className = 'birthdate-field-row';
 
             const input = document.createElement('input');
-            input.type = 'tel';
+            input.type = 'tel'; // type="number" は スタイルや挙動に制限があるため tel を使用
+            input.inputMode = 'numeric'; // モバイルでの数値キーボード表示
             input.pattern = field.pattern;
             input.maxLength = field.maxLength;
             input.id = `input-${step.id}-${field.idSuffix}`;
             input.required = true;
-            // width は CSS で指定
             inputElements[field.idSuffix] = input;
 
             const label = document.createElement('label');
             label.htmlFor = input.id;
             label.textContent = field.label;
 
-            fieldRow.appendChild(input); // input を row に追加
-            fieldRow.appendChild(label); // label を row に追加
+            fieldRow.appendChild(input);
+            fieldRow.appendChild(label);
 
             const exampleText = document.createElement('small');
             exampleText.className = 'birthdate-example';
             exampleText.textContent = field.example;
 
-            input.addEventListener('input', () => clearError(container));
+            // グループ全体のエラークリア
+            input.addEventListener('input', () => {
+                clearError(container);
+                clearError(inputWrapper); // 個別フィールドのエラーもクリア
+            });
 
             if (fieldIndex < fields.length - 1) {
                 input.addEventListener('input', (e) => {
@@ -144,52 +171,65 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
                 });
             }
 
-            // --- wrapper に row, example, error を追加 ---
-            inputWrapper.appendChild(fieldRow); // 横並びの input+label
-            inputWrapper.appendChild(exampleText); // その下に例
+            inputWrapper.appendChild(fieldRow);
+            inputWrapper.appendChild(exampleText);
             container.appendChild(inputWrapper);
         });
-
-        // グループ全体用のエラーメッセージ領域を決定ボタンの前に追加 ---
-        const groupErrorSpan = document.createElement('span');
-        groupErrorSpan.className = 'error-message group-error'; // 新しいクラスを付与
-        groupErrorSpan.id = `error-${step.id}-group`; // グループ用ID
-        container.appendChild(groupErrorSpan);
 
         const submitButton = document.createElement('button');
         submitButton.textContent = '決定';
         submitButton.classList.add('submit-input-btn');
 
+        // グループ全体用のエラーメッセージ領域（ボタンの前に追加）
+        const groupErrorSpan = document.createElement('span');
+        groupErrorSpan.className = 'error-message group-error';
+        groupErrorSpan.id = `error-${step.id}-group`;
+        container.appendChild(groupErrorSpan); // 先に追加しておく
+
         submitButton.addEventListener('click', () => {
             let isValid = true;
-            clearError(container);
+            clearError(container); // グループエラーをクリア
 
             const year = inputElements['Year'].value;
             const month = inputElements['Month'].value;
             const day = inputElements['Day'].value;
+            const yearWrapper = inputElements['Year'].closest('.birthdate-field-wrapper');
+            const monthWrapper = inputElements['Month'].closest('.birthdate-field-wrapper');
+            const dayWrapper = inputElements['Day'].closest('.birthdate-field-wrapper');
+            clearError(yearWrapper);
+            clearError(monthWrapper);
+            clearError(dayWrapper);
 
-            // バリデーションチェックのみ行う
-            if (!year.match(/^\d{4}$/)) isValid = false;
-            if (!month.match(/^\d{2}$/)) isValid = false;
-            else if (parseInt(month) < 1 || parseInt(month) > 12) isValid = false;
-            if (!day.match(/^\d{2}$/)) isValid = false;
-            else if (parseInt(day) < 1 || parseInt(day) > 31) isValid = false;
+            if (!year.match(/^\d{4}$/)) { isValid = false; displayError(yearWrapper, '4桁で入力'); }
+            if (!month.match(/^\d{1,2}$/) || parseInt(month) < 1 || parseInt(month) > 12) { isValid = false; displayError(monthWrapper, '1-12'); }
+            if (!day.match(/^\d{1,2}$/) || parseInt(day) < 1 || parseInt(day) > 31) { isValid = false; displayError(dayWrapper, '1-31'); }
+
+            // 日付の妥当性チェック (任意だが推奨)
+            if(isValid) {
+                const date = new Date(year, month - 1, day);
+                if (date.getFullYear() !== parseInt(year) || date.getMonth() !== parseInt(month) - 1 || date.getDate() !== parseInt(day)) {
+                    isValid = false;
+                    displayError(container, '有効な日付を入力してください。'); // グループエラーとして表示
+                }
+            }
 
             if (isValid) {
+                // 月と日を2桁ゼロ埋めする
+                const paddedMonth = month.padStart(2, '0');
+                const paddedDay = day.padStart(2, '0');
                 userAnswers[`${step.id}Year`] = year;
-                userAnswers[`${step.id}Month`] = month;
-                userAnswers[`${step.id}Day`] = day;
+                userAnswers[`${step.id}Month`] = paddedMonth;
+                userAnswers[`${step.id}Day`] = paddedDay;
                 handleBirthdateInput(index);
-            } else {
-                // グループエラーを表示 ---
-                displayError(container, '生年月日を正しく入力してください (年4桁、月2桁、日2桁)');
+            } else if (container.querySelector('.group-error').textContent === '') {
+                // 個別エラーがあるがグループエラーがない場合、汎用メッセージを表示
+                displayError(container, '生年月日を正しく入力してください。');
             }
         });
 
         container.appendChild(submitButton);
         return container;
     }
-
 
     // 氏名・ふりがな入力グループのコンテナを作成
     function createNameKanaContainer(step, index) {
@@ -199,10 +239,9 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         container.classList.add('input-container', 'name-kana-group');
         container.setAttribute('data-question-index', index);
 
-        // フィールド定義修正
         const fields = [
-            { id: 'name', label: 'お名前', placeholder: '例：山田太郎', pattern: "^[^a-zA-Z0-9 -~｡-ﾟ]+$", title: '全角で入力してください（半角英数字不可）', errorId: `error-input-name` },
-            { id: 'kana', label: 'ふりがな', placeholder: '例：やまだたろう', pattern: "^[ぁ-んー\\u3000]+$", title: '全角ひらがなで入力してください', errorId: `error-input-kana` } // 全角スペース \u3000 を許容
+            { id: 'name', label: 'お名前', placeholder: '例：山田太郎', pattern: "^[^ -~｡-ﾟ]+$", title: '全角で入力してください（記号・半角不可）', errorId: `error-input-name` }, // 半角スペースも不可に
+            { id: 'kana', label: 'ふりがな', placeholder: '例：やまだたろう', pattern: "^[ぁ-んー\\u3000]+$", title: '全角ひらがなで入力してください', errorId: `error-input-kana` }
         ];
         const inputElements = {};
 
@@ -217,11 +256,8 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             const input = document.createElement('input');
             input.type = 'text';
             input.id = `input-${field.id}`;
-            input.placeholder = field.placeholder; // "例：" を追加
-            if (field.pattern) {
-                input.pattern = field.pattern; // 新しいパターン
-                input.title = field.title; // 新しい説明
-            }
+            input.placeholder = field.placeholder;
+            if (field.pattern) { input.pattern = field.pattern; input.title = field.title; }
             input.required = true;
             inputElements[field.id] = input;
 
@@ -245,31 +281,22 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             let isValid = true;
             const nameInput = inputElements['name'];
             const kanaInput = inputElements['kana'];
-            clearError(nameInput.parentNode);
-            clearError(kanaInput.parentNode);
+            const nameContainer = nameInput.parentNode;
+            const kanaContainer = kanaInput.parentNode;
+            clearError(nameContainer);
+            clearError(kanaContainer);
 
-            const nameValue = nameInput.value; // trimしない値でパターンチェック
-            const kanaValue = kanaInput.value; // trimしない値でパターンチェック
+            const nameValue = nameInput.value;
+            const kanaValue = kanaInput.value;
             const nameTrimmed = nameValue.trim();
             const kanaTrimmed = kanaValue.trim();
 
+            if (nameTrimmed === '') { displayError(nameContainer, 'お名前を入力してください。'); isValid = false; }
+             // 全角チェックを強化（半角スペースや記号を許容しない）
+            else if (nameInput.pattern && !new RegExp(nameInput.pattern).test(nameValue)) { displayError(nameContainer, nameInput.title); isValid = false; }
 
-            if (nameTrimmed === '') {
-                 displayError(nameInput.parentNode, 'お名前を入力してください。');
-                 isValid = false;
-            } else if (nameInput.pattern && nameValue !== '' && !new RegExp(nameInput.pattern).test(nameValue)) { // trim前の値でチェック
-                 displayError(nameInput.parentNode, nameInput.title || 'お名前の形式が正しくありません。');
-                 isValid = false;
-            }
-
-             if (kanaTrimmed === '') {
-                 displayError(kanaInput.parentNode, 'ふりがなを入力してください。');
-                 isValid = false;
-            } else if (kanaInput.pattern && kanaValue !== '' && !new RegExp(kanaInput.pattern).test(kanaValue)) { // trim前の値でチェック
-                 // エラーメッセージから「スペースで」を削除
-                 displayError(kanaInput.parentNode, kanaInput.title || 'ふりがなの形式が正しくありません。');
-                 isValid = false;
-             }
+            if (kanaTrimmed === '') { displayError(kanaContainer, 'ふりがなを入力してください。'); isValid = false; }
+            else if (kanaInput.pattern && !new RegExp(kanaInput.pattern).test(kanaValue)) { displayError(kanaContainer, kanaInput.title); isValid = false; }
 
             if (isValid) {
                 userAnswers['name'] = nameTrimmed;
@@ -282,16 +309,14 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         return container;
     }
 
-
     // 汎用的な入力コンテナを作成する
     function createGenericInputContainer(step, index) {
          if (!step.inputType || ['select', 'birthdate-group', 'name-kana-group'].includes(step.inputType)) return null;
 
         const container = document.createElement('div');
         container.classList.add('input-container');
-        const inputWrapper = document.createElement('div'); // input と error をまとめるラッパー
+        const inputWrapper = document.createElement('div');
         inputWrapper.classList.add('input-wrapper');
-
         container.setAttribute('data-question-index', index);
 
         let inputElement;
@@ -305,6 +330,15 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         inputElement.id = `input-${step.id}`;
         inputElement.placeholder = step.placeholder || '';
         inputElement.required = step.required !== false;
+
+        // 電話番号には inputmode="tel" を追加
+        if (step.inputType === 'tel') {
+            inputElement.inputMode = 'tel';
+        }
+        // メールには inputmode="email" を追加
+        if (step.inputType === 'email') {
+            inputElement.inputMode = 'email';
+        }
 
         const errorSpan = document.createElement('span');
         errorSpan.className = 'error-message';
@@ -325,20 +359,19 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             let isValid = true;
 
             if (inputElement.required && trimmedValue === '') {
-                 displayError(inputWrapper, '入力してください。');
-                 isValid = false;
+                 displayError(inputWrapper, '入力してください。'); isValid = false;
             }
+             // Email validation (simple)
             else if (inputElement.type === 'email' && trimmedValue !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                 displayError(inputWrapper, '有効なメールアドレスを入力してください。');
-                 isValid = false;
+                 displayError(inputWrapper, '有効なメールアドレスを入力してください。'); isValid = false;
             }
+             // Phone validation (digits and hyphens)
              else if (inputElement.type === 'tel' && trimmedValue !== '' && !/^[0-9\-]+$/.test(value)) {
-                  displayError(inputWrapper, '有効な電話番号を入力してください。');
-                  isValid = false;
+                  displayError(inputWrapper, '有効な電話番号を入力してください (数字とハイフンのみ)。'); isValid = false;
              }
 
             if (isValid) {
-                 handleTextInput(value, index);
+                 handleTextInput(trimmedValue, index); // Trimmed value を渡す
             }
         });
 
@@ -356,7 +389,6 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         return container;
     }
 
-
     // --- Main Logic Functions ---
 
     /**
@@ -371,15 +403,24 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             let firstUnansweredIndex = -1;
             for(let i=0; i < index; i++) {
                 const step = chatFlow[i];
-                if(step.required === false) continue;
+                // summaryタイプ自体はスキップ
+                if (step.type === 'summary') continue;
+                // requiredでない項目はチェック不要（ただし、必須でない=未入力OKなので、実際には未入力でも進む）
+                // if(step.required === false) continue;
+
                 let answered = false;
                 if (step.inputType === 'birthdate-group') answered = userAnswers.hasOwnProperty(`${step.id}Year`);
                 else if (step.inputType === 'name-kana-group') answered = userAnswers.hasOwnProperty('name');
                 else if (step.id) answered = userAnswers.hasOwnProperty(step.id);
-                if (!answered) { firstUnansweredIndex = i; break; }
+
+                // 必須項目が未回答の場合 (便宜上、全項目を必須扱いとしてチェック)
+                if (!answered) {
+                    firstUnansweredIndex = i;
+                    break;
+                }
             }
             if (firstUnansweredIndex !== -1) {
-                 console.warn(`未回答の必須質問があります (インデックス: ${firstUnansweredIndex})。該当質問を表示します。`);
+                 console.warn(`未回答の質問があります (インデックス: ${firstUnansweredIndex})。該当質問を表示します。`);
                  currentQuestionIndex = firstUnansweredIndex;
                  displayQuestion(currentQuestionIndex);
                  return;
@@ -392,11 +433,8 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         const questionIndex = index;
 
         let botMessageElement = chatMessagesContainer.querySelector(`.bot-message[data-question-index="${questionIndex}"]`);
-        let isNewBotMessage = false; // 新規メッセージフラグ
 
         if (!botMessageElement) {
-            // --- 修正: 新規ボットメッセージ追加時にスクロールを実行 ---
-            isNewBotMessage = true; // フラグを立てる
             botMessageElement = document.createElement('div');
             botMessageElement.classList.add('message', 'bot-message');
             const questionText = typeof currentStep.question === 'function'
@@ -404,14 +442,11 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
                 : currentStep.question;
             botMessageElement.textContent = questionText || '';
             botMessageElement.setAttribute('data-question-index', questionIndex);
-            addElementToChat(botMessageElement); // 末尾に追加（スクロールはしない）
+            addElementToChat(botMessageElement);
 
-            // 新しいボットメッセージの場合のみ、追加後にスクロールを実行
             setTimeout(() => {
-                // 新しいボットメッセージの先頭が表示領域の上部(マージン考慮)に来るようにスクロール
                 botMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50); // レンダリングのためのわずかな遅延
-            // --- 修正完了 ---
+            }, 50);
         }
 
         // 古い入力要素・回答・やり直しボタンの削除
@@ -427,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             }
         }
 
-        // 新しい入力要素の生成
+        // 新しい入力要素の生成と挿入
         const optionsContainer = createOptionsContainer(currentStep, questionIndex);
         const birthdateContainer = createBirthdateContainer(currentStep, questionIndex);
         const nameKanaContainer = createNameKanaContainer(currentStep, questionIndex);
@@ -439,12 +474,10 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         else if (nameKanaContainer) inputElementToInsert = nameKanaContainer;
         else if (genericInputContainer) inputElementToInsert = genericInputContainer;
 
-        // 生成された入力コンテナをボットメッセージの直後に挿入
         if (inputElementToInsert) {
-            addElementToChat(inputElementToInsert, botMessageElement); // 挿入（スクロールなし）
+            addElementToChat(inputElementToInsert, botMessageElement);
         }
     }
-
 
     // --- ハンドラー関数 ---
     function handleOptionClick(option, questionIndex) {
@@ -470,7 +503,6 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         addUserMessageAndProceed(combinedValue, questionIndex, true);
     }
 
-
     /**
      * ユーザーメッセージを追加し、やり直しボタンを表示し、次の未回答質問へ進む
      * @param {string} value 表示するユーザーの回答値
@@ -484,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
             return;
         }
 
+        // 既存のユーザーメッセージとやり直しボタンを確実に削除
         const oldUserMsg = chatMessagesContainer.querySelector(`.user-message[data-question-index="${questionIndex}"]`);
         const oldRedoBtn = chatMessagesContainer.querySelector(`.redo-button[data-question-index="${questionIndex}"]`);
         if(oldUserMsg) oldUserMsg.remove();
@@ -494,55 +527,55 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         userMessageElement.style.whiteSpace = 'pre-wrap';
         userMessageElement.textContent = value;
         userMessageElement.setAttribute('data-question-index', questionIndex);
-        addElementToChat(userMessageElement, botMessageElement); // 挿入（スクロールなし）
+        addElementToChat(userMessageElement, botMessageElement);
 
+        // グループ入力でない場合のみ、直接 userAnswers に格納
         if (!isGroupInput) {
              const currentStep = chatFlow[questionIndex];
              if (currentStep && currentStep.id) userAnswers[currentStep.id] = value;
         }
+         // 生年月日と氏名・かなは、それぞれのハンドラー関数内で userAnswers に格納済み
 
-        // --- 修正: やり直しボタンの表示条件 ---
+        // やり直しボタンを追加 (最終確認画面の前まで)
         const nextStepIndex = questionIndex + 1;
-        // 次のステップが存在すればやり直しボタンを追加（summaryの前でもOK）
-        if (nextStepIndex < chatFlow.length) {
+        if (nextStepIndex < chatFlow.length && chatFlow[nextStepIndex].type !== 'summary') {
              if (!chatMessagesContainer.querySelector(`.redo-button[data-question-index="${questionIndex}"]`)) {
                  const redoButton = document.createElement('button');
                  redoButton.classList.add('redo-button');
                  redoButton.textContent = '回答をやり直す';
                  redoButton.setAttribute('data-question-index', questionIndex);
                  redoButton.addEventListener('click', () => handleRedoClick(questionIndex));
-                 addElementToChat(redoButton, userMessageElement); // 挿入（スクロールなし）
+                 addElementToChat(redoButton, userMessageElement);
              }
         }
-        // --- 修正完了 ---
 
-
+        // 次の質問へ進むロジック（回答済みスキップ）
         let nextQuestionIndex = questionIndex + 1;
-        // 回答済みスキップロジック
         while (nextQuestionIndex < chatFlow.length) {
             const step = chatFlow[nextQuestionIndex];
-             if (step.type === 'summary') break;
+             if (step.type === 'summary') break; // Summaryまで来たらループ抜ける
+
             let answered = false;
             if (step.inputType === 'birthdate-group') answered = userAnswers.hasOwnProperty(`${step.id}Year`);
             else if (step.inputType === 'name-kana-group') answered = userAnswers.hasOwnProperty('name');
             else if (step.id) answered = userAnswers.hasOwnProperty(step.id);
 
+            // 回答済みの場合は次へ
             if (answered) {
-                 // 必須でない項目はスキップしない方が良い場合もあるが、一旦スキップ
                  nextQuestionIndex++;
             } else {
-                break; // 未回答が見つかったら抜ける
+                break; // 未回答が見つかったらそのインデックスで停止
             }
         }
 
         currentQuestionIndex = nextQuestionIndex;
-        // 次の質問表示（末尾追加ならスクロールされる）
         displayQuestion(currentQuestionIndex);
     }
 
 
     // 「回答をやり直す」ボタンの処理
     function handleRedoClick(questionIndexToRedo) {
+        console.log(`Redoing question index: ${questionIndexToRedo}`);
         // 該当インデックスのユーザーメッセージとやり直しボタンを削除
         const userMessageToRemove = chatMessagesContainer.querySelector(`.user-message[data-question-index="${questionIndexToRedo}"]`);
         const redoButtonToRemove = chatMessagesContainer.querySelector(`.redo-button[data-question-index="${questionIndexToRedo}"]`);
@@ -563,21 +596,18 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
                  delete userAnswers[stepToRedo.id];
              }
         }
+         console.log('Answers after redo:', userAnswers);
 
-        // 該当の質問の入力要素を再表示する（スクロールは displayQuestion 内で制御）
+        // 該当の質問の入力要素を再表示する
         displayQuestion(questionIndexToRedo);
     }
 
-
     // 確認画面を表示する
     function displaySummary() {
-        // --- 修正: 既存メッセージの削除処理を強化 ---
         const existingSummaryElements = chatMessagesContainer.querySelectorAll(
             '.summary-container, #summary-thankyou, #summary-instruction'
         );
         existingSummaryElements.forEach(el => el.remove());
-        // --- 修正完了 ---
-
 
         const summaryStep = chatFlow.find(step => step.type === 'summary');
         if (!summaryStep) return;
@@ -585,62 +615,61 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         const summaryContainer = document.createElement('div');
         summaryContainer.classList.add('summary-container');
 
-        // --- 修正: メッセージ追加前に存在チェック ---
-        // displaySummary が呼ばれる前に既存メッセージを削除したので、ここでは単純に追加
         const thankYouMsg = document.createElement('div');
-        thankYouMsg.id = 'summary-thankyou'; // ID追加
+        thankYouMsg.id = 'summary-thankyou';
         thankYouMsg.classList.add('message', 'bot-message');
         thankYouMsg.textContent = 'ご回答ありがとうございました。';
-        addElementToChat(thankYouMsg); // 末尾追加 -> スクロールされる
+        addElementToChat(thankYouMsg);
 
         const confirmationInstruction = document.createElement('div');
-        confirmationInstruction.id = 'summary-instruction'; // ID追加
+        confirmationInstruction.id = 'summary-instruction';
         confirmationInstruction.classList.add('message', 'bot-message');
         confirmationInstruction.textContent = '入力内容・利用規約等をご確認の上、「同意して送信」を押してください。';
-        addElementToChat(confirmationInstruction); // 末尾追加 -> スクロールされる
-        // --- 修正完了 ---
-
+        addElementToChat(confirmationInstruction);
 
         const titleElement = document.createElement('h3');
         titleElement.classList.add('summary-title');
         titleElement.textContent = summaryStep.questionText || '入力内容のご確認';
         summaryContainer.appendChild(titleElement);
 
-        // 入力内容リスト表示
+        // chatFlow を使って定義された順序で表示
         for (const step of chatFlow) {
-             if (step.type === 'summary') continue;
-             let displayValue = null;
-             // --- 修正: ラベルからコロン削除 ---
-             let displayLabel = step.questionText ? step.questionText.replace(/：$/, '') : step.id; // 末尾のコロンを削除
-             // --- 修正完了 ---
+             if (!step.id || step.type === 'summary') continue; // IDがない、またはsummaryタイプはスキップ
 
+             let displayValue = null;
+             let displayLabel = step.questionText ? step.questionText.replace(/：$/, '') : step.id;
 
              if (step.inputType === 'birthdate-group') {
                  if (userAnswers[`${step.id}Year`]) {
                      displayValue = `${userAnswers[`${step.id}Year`]}年${userAnswers[`${step.id}Month`]}月${userAnswers[`${step.id}Day`]}日`;
-                     displayLabel = step.questionText ? step.questionText.replace(/：$/, '') : step.id;
                  }
              } else if (step.inputType === 'name-kana-group') {
                  if (userAnswers['name']) {
-                     displayValue = `名前: ${userAnswers['name']}\nふりがな: ${userAnswers['kana']}`;
-                     displayLabel = step.questionText ? step.questionText.replace(/：$/, '') : step.id;
+                      // 名前とかなを別々の項目として表示
+                      const nameItem = document.createElement('div');
+                      nameItem.classList.add('summary-item');
+                      nameItem.innerHTML = `<strong>お名前</strong> <span class="summary-answer-value">${userAnswers['name']}</span>`;
+                      summaryContainer.appendChild(nameItem);
+
+                      const kanaItem = document.createElement('div');
+                      kanaItem.classList.add('summary-item');
+                      kanaItem.innerHTML = `<strong>ふりがな</strong> <span class="summary-answer-value">${userAnswers['kana']}</span>`;
+                      summaryContainer.appendChild(kanaItem);
+                      continue; // ループの残りはスキップ
                  }
-             } else if (step.id && userAnswers.hasOwnProperty(step.id)) {
+             } else if (userAnswers.hasOwnProperty(step.id)) {
                  displayValue = userAnswers[step.id];
              }
 
+            // displayValue が null でなく、空文字列でもない場合のみ表示
             if (displayValue !== null && String(displayValue).trim() !== '') {
                 const item = document.createElement('div');
                 item.classList.add('summary-item');
                 const valueSpan = document.createElement('span');
-                // --- 修正: 回答値にクラス追加 ---
                 valueSpan.className = 'summary-answer-value';
-                // --- 修正完了 ---
-                valueSpan.style.whiteSpace = 'pre-wrap';
+                valueSpan.style.whiteSpace = 'pre-wrap'; // 改行を反映させる
                 valueSpan.textContent = displayValue;
-                // --- 修正: コロン削除 ---
-                item.innerHTML = `<strong>${displayLabel}</strong> `; // コロン削除
-                // --- 修正完了 ---
+                item.innerHTML = `<strong>${displayLabel}</strong> `;
                 item.appendChild(valueSpan);
                 summaryContainer.appendChild(item);
             }
@@ -648,10 +677,11 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
 
         const linksDiv = document.createElement('div');
         linksDiv.classList.add('policy-links');
+        // ★★★ リンク先を実際のパスに修正してください ★★★
         linksDiv.innerHTML = `
-            <a href="#" target="_blank">利用規約</a>
-            <a href="#" target="_blank">プライバシーポリシー</a>
-            <a href="#" target="_blank">個人情報のお取扱いについて</a>
+            <a href="terms/terms.html#terms" target="_blank">利用規約</a>
+            <a href="terms/terms.html#privacy" target="_blank">プライバシーポリシー</a>
+            <a href="terms/terms.html#handling" target="_blank">個人情報のお取扱いについて</a>
         `;
         summaryContainer.appendChild(linksDiv);
 
@@ -661,46 +691,133 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         submitButton.addEventListener('click', handleFinalSubmit);
         summaryContainer.appendChild(submitButton);
 
-        addElementToChat(summaryContainer); // 末尾追加 -> スクロールされる
+        // エラーメッセージ表示用要素もここに追加
+        const errorMsgElement = document.createElement('p');
+        errorMsgElement.style.color = 'red';
+        errorMsgElement.style.marginTop = '10px';
+        errorMsgElement.style.textAlign = 'center';
+        errorMsgElement.className = 'final-error-message';
+        summaryContainer.appendChild(errorMsgElement);
 
-        // thankYouMsg または titleElement をターゲットにする
+        addElementToChat(summaryContainer);
+
         const scrollToElement = document.getElementById('summary-thankyou') || summaryContainer.querySelector('.summary-title');
         if (scrollToElement) {
             setTimeout(() => {
-                // 要素の先頭が表示領域の上部(マージン考慮)に来るようにスクロール
                 scrollToElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100); // addElementToChat のスクロールと競合しないよう少し長めに遅延
+            }, 100);
         }
     }
 
-    // 最終送信処理
+    // 最終送信処理 (ダイアログ表示対応版)
     function handleFinalSubmit() {
         console.log("最終送信データ:", userAnswers);
-        // !!! TODO: ここで実際にデータをサーバーに送信する処理を実装する !!!
 
         const finalButton = document.getElementById('final-submit-btn');
+        const summaryContainer = document.querySelector('.summary-container');
+        let errorMsgElement = summaryContainer ? summaryContainer.querySelector('.final-error-message') : null;
+
         if(finalButton) {
             finalButton.disabled = true;
             finalButton.textContent = '送信中...';
         }
+        if (errorMsgElement) errorMsgElement.textContent = ''; // エラーメッセージクリア
 
-        setTimeout(() => {
-            if(finalButton) finalButton.textContent = '送信完了';
+        // ★ PHPスクリプトへのパスを確認してください
+        const phpScriptPath = 'send_chat_mail.php';
 
-            const thankYouMessage = document.createElement('div');
-            thankYouMessage.classList.add('message', 'bot-message');
-            thankYouMessage.textContent = 'お問い合わせありがとうございました。担当者からの連絡をお待ちください。';
-            addElementToChat(thankYouMessage); // 末尾追加 -> スクロールされる
+        fetch(phpScriptPath, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(userAnswers)
+        })
+        .then(response => {
+            if (!response.ok) {
+                // レスポンスがokでない場合は、レスポンスボディをテキストとして読み込もうとする
+                return response.text().then(text => {
+                     console.error('Server Response Text (Error):', text); // エラー内容をログに
+                     throw new Error(`サーバーエラーが発生しました (HTTP ${response.status})`);
+                });
+            }
+             // レスポンスがokならJSONとして処理
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // --- 送信成功 ---
+                // 1. チャットモーダルを閉じる
+                if (chatContainer) {
+                    chatContainer.classList.remove('is-open');
+                }
+                // 2. 完了メッセージをダイアログに設定
+                if (successDialogMessage) {
+                    successDialogMessage.textContent = 'お問い合わせありがとうございました。\nご登録いただいたメールアドレスに後ほど資料をお送りします。';
+                }
+                // 3. ダイアログを表示
+                if (successDialogOverlay) {
+                    successDialogOverlay.classList.add('visible');
+                }
+                // 4. チャット内容のリセット（任意）
+                // resetChat();
 
-             chatMessagesContainer.querySelectorAll('.redo-button').forEach(btn => btn.remove());
+            } else {
+                // --- 送信失敗 (PHP側で success: false) ---
+                if(finalButton) {
+                    finalButton.disabled = false;
+                    finalButton.textContent = '同意して送信';
+                }
+                const errorMessage = data.error || 'メールの送信に失敗しました。時間をおいて再度お試しください。';
+                 if (errorMsgElement) {
+                     errorMsgElement.textContent = errorMessage;
+                 } else {
+                     alert(errorMessage); // フォールバック
+                 }
+                 console.error('Mail sending failed:', data.error || 'Unknown error from server');
+            }
+        })
+        .catch(error => {
+            // --- 通信エラー ---
+            console.error('Fetch Error:', error);
+            if(finalButton) {
+                finalButton.disabled = false;
+                finalButton.textContent = '同意して送信';
+            }
+            const networkErrorMessage = `通信エラーが発生しました: ${error.message}`; // エラーメッセージを含める
+             if (errorMsgElement) {
+                 errorMsgElement.textContent = networkErrorMessage;
+             } else {
+                 alert(networkErrorMessage); // フォールバック
+             }
+        });
+    } // handleFinalSubmit 関数の終わり
 
-        }, 500);
+    // --- ダイアログの閉じるボタンのイベントリスナー ---
+    if (successDialogCloseBtn && successDialogOverlay) {
+        successDialogCloseBtn.addEventListener('click', () => {
+            successDialogOverlay.classList.remove('visible');
+            // オプション：ダイアログを閉じたらチャット内容をリセットする場合
+            // resetChat();
+        });
+        // オーバーレイ自身をクリックしても閉じるようにする（任意）
+        successDialogOverlay.addEventListener('click', (event) => {
+             if (event.target === successDialogOverlay) { // クリックされたのがオーバーレイ自身か確認
+                 successDialogOverlay.classList.remove('visible');
+                 // resetChat(); // 必要ならここでもリセット
+             }
+        });
     }
-
 
     // --- Event Listeners ---
     openChatBtns.forEach(button => {
         button.addEventListener('click', () => {
+            // ダイアログが表示されていたら閉じる
+            if (successDialogOverlay && successDialogOverlay.classList.contains('visible')) {
+                successDialogOverlay.classList.remove('visible');
+            }
+            // チャットを開く
             chatContainer.classList.add('is-open');
             if (!isChatInitialized) {
                  resetChatVisuals();
@@ -717,12 +834,22 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
         // resetChat();
     });
 
-    // (オプション) チャットリセット関数
+    // --- チャットリセット関数 ---
     function resetChat() {
         for (const key in userAnswers) { delete userAnswers[key]; }
         resetChatVisuals();
         currentQuestionIndex = 0;
         isChatInitialized = false;
+         // 送信ボタン周りの状態もリセットする必要があればここに追加
+         const finalButton = document.getElementById('final-submit-btn');
+         if (finalButton) {
+             finalButton.disabled = false;
+             finalButton.textContent = '同意して送信';
+         }
+         const errorMsgElement = document.querySelector('.final-error-message');
+         if (errorMsgElement) {
+             errorMsgElement.textContent = '';
+         }
     }
     // 表示だけリセットする関数
     function resetChatVisuals() {
@@ -730,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => { // DOM読み込み後に�
     }
 
     // --- Initialization ---
-    // ページ読み込み時にはチャットを開始しない
+    // (初期化処理があればここに記述)
 
 }); // DOMContentLoaded の終わり
 // --- END OF SCRIPT ---

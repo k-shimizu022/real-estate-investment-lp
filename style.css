@@ -1617,6 +1617,61 @@ footer {
     visibility: visible; /* 表示状態（アクセス可能に） */
 }
 
+/*--------------------------------------------------------------
+# 送信完了メッセージ
+--------------------------------------------------------------*/
+#success-dialog-overlay {
+    position: fixed; /* 画面に固定 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
+    display: flex; /* flexboxで中央寄せ */
+    justify-content: center;
+    align-items: center;
+    z-index: 1100; /* チャットフォームより手前に表示 */
+    opacity: 0; /* 初期状態は透明 */
+    visibility: hidden; /* 初期状態は非表示 */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#success-dialog-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#success-dialog-box {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 90%;
+    width: 450px; /* ダイアログの幅 */
+    transform: scale(0.9); /* 初期状態は少し小さい */
+    transition: transform 0.3s ease;
+}
+
+#success-dialog-overlay.visible #success-dialog-box {
+    transform: scale(1); /* 表示時に元のサイズに */
+}
+
+#success-dialog-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #333;
+    text-align: left;
+    white-space: pre-wrap;
+}
+
+#success-dialog-close-btn {
+    /* ボタンのスタイルは既存の .btn-primary を流用 */
+    padding: 10px 30px;
+    font-size: 1rem;
+}
+
 /* スマホ表示など、画面幅が狭い場合 */
 @media (max-width: 768px) {
     #fixed-cta-btn {
