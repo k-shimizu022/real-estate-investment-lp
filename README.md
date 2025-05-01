@@ -1,1 +1,2 @@
 send_chat_mail.phpとconfig.phpがない
+XAMPPのhtdocsにあるプロジェクトフォルダを参照して
