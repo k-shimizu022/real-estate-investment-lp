@@ -1,0 +1,1 @@
+send_chat_mail.phpとconfig.phpがない
